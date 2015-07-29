@@ -230,8 +230,6 @@ void love(int wait) {
   
   boolean done = true;
   
-  uint8_t *letter;
-  
   for(int pixel = 0;pixel< PIXEL_COUNT;pixel++) {
    
     for(int i =  0;i<3;i++) {
@@ -266,20 +264,10 @@ void love(int wait) {
     tempColB[1] = newrandom(75,99);
     tempColB[2] = newrandom(50,99);
     
-    if (love_mode == 0) {
-      letter = L;
-    } else if (love_mode == 1) {
-      letter = O; 
-    } else if (love_mode == 2) {
-      letter = V;
-    } else {
-      letter = E;
-    }
-    
     for(int x = 0;x < 7;x++) {
       for(int y = 0;y < 6;y++) {
         
-        if(letter[x][y] == 1) {
+        if((love_mode == 0 && L[x][y] == 1) or (love_mode == 1 && O[x][y] == 1) or (love_mode == 2 && V[x][y] == 1) or (love_mode == 3 && E[x][y] == 1)) {
           int pixel = layout[x][y];
           if (pixel != NULL) {
             newColor[pixel][0] = tempCol[0];
