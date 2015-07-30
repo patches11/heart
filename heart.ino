@@ -36,10 +36,10 @@ const uint32_t palette[256] = {
   };
   
   const uint8_t L[6][7] = {
-   INUL,   0,   1,INUL,   0,   0,INUL,
-      0,   0,   1,   0,   0,   0,   0,
-      0,   0,   1,   0,   0,   0,   0,
-   INUL,   0,   1,   0,   0,   0,INUL,
+   INUL,   0,   0,INUL,   1,   0,INUL,
+      0,   0,   0,   0,   1,   0,   0,
+      0,   0,   0,   0,   1,   0,   0,
+   INUL,   0,   0,   0,   1,   0,INUL,
    INUL,INUL,   1,   1,   1,INUL,INUL,
    INUL,INUL,INUL,   0,INUL,INUL,INUL
   };
@@ -67,7 +67,7 @@ const uint32_t palette[256] = {
       0,   0,   1,   1,   1,   0,   0,
       0,   0,   1,   0,   1,   0,   0,
    INUL,   0,   1,   1,   1,   0,INUL,
-   INUL,INUL,   1,   0,   0,INUL,INUL,
+   INUL,INUL,   0,   0,   1,INUL,INUL,
    INUL,INUL,INUL,   1,INUL,INUL,INUL
   };
   
@@ -138,10 +138,10 @@ void setup() {
   }
   
   mode = LOVE;
-  cycle_modes = false;
-  cycle_time = 10000;
+  cycle_modes = true;
+  cycle_time = 30000;
   start_time = millis();
-  love_mode = 0;
+  love_mode = 3;
 }
 
 unsigned long newrandom(unsigned long howsmall, unsigned long howbig)
