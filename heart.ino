@@ -207,7 +207,7 @@ void randomColors(int wait) {
 }
 
 void plasma(int wait) { 
-  uint16_t color;
+  uint32_t color;
   
   int paletteShift = (millis() % 100000) / 30;
  
@@ -228,7 +228,7 @@ void plasma(int wait) {
 }
 
 void wipeDown(int wait) {
-  uint16_t color;
+  uint32_t color;
   
   int paletteShift = (millis() % 100000) / 30;
   
@@ -248,7 +248,7 @@ void wipeDown(int wait) {
 }
 
 void wipeSideways(int wait) {
-  uint16_t color;
+  uint32_t color;
   
   int paletteShift = (millis() % 100000) / 30;
   
@@ -267,7 +267,7 @@ void wipeSideways(int wait) {
 }
 
 void testPalette(int wait) {
- uint16_t color;
+ uint32_t color;
  
  Serial.println(count % 256);
  
@@ -283,7 +283,7 @@ void testPalette(int wait) {
 }
 
 void love(int wait) {
-  uint16_t color;
+  uint32_t color;
   
   boolean done = true;
   
