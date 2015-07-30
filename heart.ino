@@ -55,8 +55,8 @@ const uint32_t palette[256] = {
   
      const uint8_t V[6][7] = {
    INUL,   0,   0,INUL,   0,   0,INUL,
-      1,   0,   0,   0,   0,   0,   1,
-      0,   1,   0,   0,   0,   1,   0,
+      0,   0,   1,   0,   1,   0,   0,
+      0,   0,   1,   0,   1,   0,   0,
    INUL,   0,   1,   0,   1,   0,INUL,
    INUL,INUL,   0,   1,   0,INUL,INUL,
    INUL,INUL,INUL,   0,INUL,INUL,INUL
@@ -102,7 +102,7 @@ const uint8_t gammaC[] = {
 #define WIPESIDEWAYS 4
 #define TESTPALETTE 99
 
-#define MODES 4
+#define MODES 5
 
 int newColor[27][3];
 int prevColor[27][3];
