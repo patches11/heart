@@ -1,5 +1,5 @@
 
-#include <Adafruit_NeoPixel.h>
+#include <FastLED.h>
 #include <HSBColor.h>
 
 #define INUL 99
@@ -63,17 +63,17 @@ const uint32_t palette[256] = {
   };
   
        const uint8_t E[6][7] = {
-   INUL,   0,   0,INUL,   0,   0,INUL,
+   INUL,   0,   1,INUL,   1,   0,INUL,
+      0,   0,   0,   0,   1,   0,   0,
       0,   0,   1,   1,   1,   0,   0,
-      0,   0,   1,   0,   1,   0,   0,
-   INUL,   0,   1,   1,   1,   0,INUL,
-   INUL,INUL,   0,   0,   1,INUL,INUL,
-   INUL,INUL,INUL,   1,INUL,INUL,INUL
+   INUL,   0,   0,   0,   1,   0,INUL,
+   INUL,INUL,   1,   1,   1,INUL,INUL,
+   INUL,INUL,INUL,   0,INUL,INUL,INUL
   };
   
   
-const uint8_t gammaC[] = {
-    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+const uint8_t gammaC[256] = {
+  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  1,  1,  1,
     1,  1,  1,  1,  1,  1,  1,  1,  1,  2,  2,  2,  2,  2,  2,  2,
     2,  3,  3,  3,  3,  3,  3,  3,  4,  4,  4,  4,  4,  5,  5,  5,
@@ -89,10 +89,13 @@ const uint8_t gammaC[] = {
   144,146,148,150,152,154,156,158,160,162,164,167,169,171,173,175,
   177,180,182,184,186,189,191,193,196,198,200,203,205,208,210,213,
   215,218,220,223,225,228,231,233,236,239,241,244,247,249,252,255 };
-  
-#define PIXEL_PIN    2    // Digital IO pin connected to the NeoPixels.
 
-#define PIXEL_COUNT 27
+#define LED_PIN     2
+#define COLOR_ORDER RGB
+#define CHIPSET     WS2811
+#define PIXEL_COUNT    27
+
+#define BRIGHTNESS  64
 
 // mode state defintions
 #define RANDOM 0
@@ -101,6 +104,7 @@ const uint8_t gammaC[] = {
 #define LOVE 3
 #define WIPESIDEWAYS 4
 #define TESTPALETTE 99
+#define TESTWHITE 100
 
 #define MODES 5
 
@@ -116,19 +120,20 @@ int start_time;
 int love_mode;
 int count;
 
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXEL_COUNT, PIXEL_PIN, NEO_RGB + NEO_KHZ800);
+CRGB leds[PIXEL_COUNT];
 
 void setup() {
   Serial.begin(9600);
-  strip.begin();
-  strip.setBrightness(255);
-  strip.show();
+  FastLED.addLeds<CHIPSET, LED_PIN, COLOR_ORDER>(leds, PIXEL_COUNT);
+  FastLED.setCorrection(Typical8mmPixel);
+  FastLED.setBrightness( BRIGHTNESS );
+  FastLED.show();
+  
+  random16_add_entropy( random());
   
   count = 0;
   
   Serial.println("setup");
-  
-  randomSeed(analogRead(0));
   
   for(int i = 0;i<27;i++) {
     for(int j = 0;j<3;j++) {
@@ -138,7 +143,7 @@ void setup() {
   }
   
   mode = LOVE;
-  cycle_modes = true;
+  cycle_modes = false;
   cycle_time = 30000;
   start_time = millis();
   love_mode = 3;
@@ -163,11 +168,14 @@ void loop()  {
     wipeSideways(20);
   } else if (mode == TESTPALETTE) {
      testPalette(20); 
+  } else if (mode == TESTWHITE) {
+    testWhite(); 
   }
   
   if (cycle_modes && start_time + cycle_time < millis()) {
     mode = (mode + 1) % MODES;
     start_time = millis();
+    love_mode = 3;
   }
 }
 
@@ -183,14 +191,12 @@ void randomColors(int wait) {
     }
     
     if (done) {
-      newColor[pixel][0] = newrandom(0,359);
-      newColor[pixel][1] = newrandom(75,99);
-      newColor[pixel][2] = newrandom(50,99);
+      newColor[pixel][0] = random8();
+      newColor[pixel][1] = random8(200,256);
+      newColor[pixel][2] = random8(200,256);
     }
     
-    H2R_HSBtoRGB(prevColor[pixel][0], prevColor[pixel][1], prevColor[pixel][2], tempCol);
-    
-    strip.setPixelColor(pixel, tempCol[0], tempCol[1], tempCol[2]);
+    leds[pixel].setHSV(prevColor[pixel][0], prevColor[pixel][1], prevColor[pixel][2]);
     
     for(int i =  0;i<3;i++) {
       if (newColor[pixel][i] > prevColor[pixel][i]) {
@@ -201,7 +207,7 @@ void randomColors(int wait) {
     }
   }
   
-  strip.show();
+  FastLED.show();
  
   delay(wait);
 }
@@ -218,11 +224,11 @@ void plasma(int wait) {
       int pixel = layout[pix_y][pix_x];
       if (pixel != INUL) {
         color = palette[((buffer[x+16][y+16] + paletteShift) % 256)];
-        strip.setPixelColor(pixel, color);
+        leds[pixel].setRGB((color >> 16) & 0x0000FF, (color >> 8) & 0x0000FF, color & 0x0000FF);
       }
     }
   }
-  strip.show();
+  FastLED.show();
   
   delay(wait);
 }
@@ -238,11 +244,11 @@ void wipeDown(int wait) {
       Serial.println(pixel);
       if(pixel != INUL) {
         color = palette[(y*15 + paletteShift) % 256];
-        strip.setPixelColor(pixel, color);
+        leds[pixel].setRGB((color >> 16) & 0x0000FF, (color >> 8) & 0x0000FF, color & 0x0000FF);
       }  
     }
   }
-  strip.show();
+  FastLED.show();
   
   delay(wait);
 }
@@ -257,11 +263,11 @@ void wipeSideways(int wait) {
       int pixel = layouto[x][y];
       if(pixel != INUL) {
         color = palette[(y*15 + paletteShift) % 256];
-        strip.setPixelColor(pixel, color);
+        leds[pixel].setRGB((color >> 16) & 0x0000FF, (color >> 8) & 0x0000FF, color & 0x0000FF);
       }  
     }
   }
-  strip.show();
+  FastLED.show();
   
   delay(wait);
 }
@@ -273,9 +279,9 @@ void testPalette(int wait) {
  
  for(int pixel = 0;pixel< PIXEL_COUNT;pixel++) {
    color = palette[count % 256];
-   strip.setPixelColor(pixel, color);
+   leds[pixel].setRGB((color >> 16) & 0x0000FF, (color >> 8) & 0x0000FF, color & 0x0000FF);
  }
- strip.show();
+ FastLED.show();
  
  count++;
  
@@ -283,8 +289,6 @@ void testPalette(int wait) {
 }
 
 void love(int wait) {
-  uint32_t color;
-  
   boolean done = true;
   
   for(int pixel = 0;pixel< PIXEL_COUNT;pixel++) {
@@ -295,9 +299,7 @@ void love(int wait) {
       }
     }
     
-    H2R_HSBtoRGB(prevColor[pixel][0], prevColor[pixel][1], prevColor[pixel][2], tempCol);
-    
-    strip.setPixelColor(pixel, tempCol[0], tempCol[1], tempCol[2]);
+    leds[pixel].setHSV(prevColor[pixel][0], prevColor[pixel][1], prevColor[pixel][2]);
     
     for(int i =  0;i<3;i++) {
       if (newColor[pixel][i] > prevColor[pixel][i]) {
@@ -308,20 +310,20 @@ void love(int wait) {
     }
   }
   
-  strip.show();
+  FastLED.show();
   
   if (done) {
     //in letter
     love_mode = (love_mode + 1) % 4;
     
-    tempCol[0] = newrandom(0,359);
-    tempCol[1] = newrandom(75,99);
-    tempCol[2] = newrandom(50,99);
+    tempCol[0] = random8();
+    tempCol[1] = random8(225,256);
+    tempCol[2] = random8(225,256);
     
     //out of letter
-    tempColB[0] = newrandom(0,359);
-    tempColB[1] = newrandom(75,99);
-    tempColB[2] = newrandom(50,99);
+    tempColB[0] = random8();
+    tempColB[1] = random8(175,200);
+    tempColB[2] = random8(175,200);
     
     for(int x = 0;x < 7;x++) {
       for(int y = 0;y < 6;y++) {
@@ -346,5 +348,16 @@ void love(int wait) {
   }
   
   delay(wait); 
+}
+
+void testWhite() {
+   for(int pixel = 0;pixel< PIXEL_COUNT;pixel++) {
+    leds[pixel] = CRGB::White;
+  }
+  
+  FastLED.show();
+  
+  
+  delay(200);
 }
 
