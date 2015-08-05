@@ -103,10 +103,11 @@ const uint8_t gammaC[256] = {
 #define WIPEDOWN 2
 #define LOVE 3
 #define WIPESIDEWAYS 4
+#define DRIP 5
 #define TESTPALETTE 99
 #define TESTWHITE 100
 
-#define MODES 5
+#define MODES 6
 
 int newColor[27][3];
 int prevColor[27][3];
@@ -117,10 +118,13 @@ int mode;
 boolean cycle_modes;
 long cycle_time;
 int start_time;
+int mode_start_time;
 int love_mode;
 int count;
 
 CRGB leds[PIXEL_COUNT];
+
+double state[6][7];
 
 void setup() {
   Serial.begin(9600);
@@ -129,11 +133,43 @@ void setup() {
   FastLED.setBrightness( BRIGHTNESS );
   FastLED.show();
   
+  for(int x = 0;x < 7;x++) {
+    for(int y = 0;y < 6;y++) {
+       state[y][x] = -1.0;   
+    }
+  }
+  
   random16_add_entropy( random());
   
   count = 0;
   
   Serial.println("setup");
+
+  for(int i = 0;i<27;i++) {
+    leds[i].setRGB(255, 0, 0);
+  }
+  FastLED.show();
+
+  FastLED.delay(500);
+
+  for(int i = 0;i<27;i++) {
+    leds[i].setRGB(0, 255, 0);
+  }
+  FastLED.show();
+
+  FastLED.delay(500);
+
+  for(int i = 0;i<27;i++) {
+    leds[i].setRGB(0, 0, 255);
+  }
+  FastLED.show();
+
+  FastLED.delay(500);
+
+  for(int i = 0;i<27;i++) {
+    leds[i].setRGB(0, 0, 0);
+  }
+  FastLED.show();
   
   for(int i = 0;i<27;i++) {
     for(int j = 0;j<3;j++) {
@@ -142,11 +178,11 @@ void setup() {
     } 
   }
   
-  mode = LOVE;
+  mode = DRIP;
   cycle_modes = false;
   cycle_time = 30000;
   start_time = millis();
-  love_mode = 3;
+  love_mode = 0;
 }
 
 unsigned long newrandom(unsigned long howsmall, unsigned long howbig)
@@ -166,7 +202,9 @@ void loop()  {
     love(20);
   } else if (mode == WIPESIDEWAYS) {
     wipeSideways(20);
-  } else if (mode == TESTPALETTE) {
+  } else if (mode == DRIP) {
+    drip(20);
+  }else if (mode == TESTPALETTE) {
      testPalette(20); 
   } else if (mode == TESTWHITE) {
     testWhite(); 
@@ -175,7 +213,7 @@ void loop()  {
   if (cycle_modes && start_time + cycle_time < millis()) {
     mode = (mode + 1) % MODES;
     start_time = millis();
-    love_mode = 3;
+    love_mode = 0;
   }
 }
 
@@ -209,7 +247,7 @@ void randomColors(int wait) {
   
   FastLED.show();
  
-  delay(wait);
+  FastLED.delay(wait);
 }
 
 void plasma(int wait) { 
@@ -230,7 +268,7 @@ void plasma(int wait) {
   }
   FastLED.show();
   
-  delay(wait);
+  FastLED.delay(wait);
 }
 
 void wipeDown(int wait) {
@@ -250,7 +288,7 @@ void wipeDown(int wait) {
   }
   FastLED.show();
   
-  delay(wait);
+  FastLED.delay(wait);
 }
 
 void wipeSideways(int wait) {
@@ -269,7 +307,7 @@ void wipeSideways(int wait) {
   }
   FastLED.show();
   
-  delay(wait);
+  FastLED.delay(wait);
 }
 
 void testPalette(int wait) {
@@ -285,7 +323,7 @@ void testPalette(int wait) {
  
  count++;
  
- delay(wait);
+ FastLED.delay(wait);
 }
 
 void love(int wait) {
@@ -328,7 +366,7 @@ void love(int wait) {
     for(int x = 0;x < 7;x++) {
       for(int y = 0;y < 6;y++) {
         
-        if((love_mode == 0 && L[y][x] == 1) or (love_mode == 1 && O[y][x] == 1) or (love_mode == 2 && V[y][x] == 1) or (love_mode == 3 && E[y][x] == 1)) {
+        if((love_mode == 1 && L[y][x] == 1) or (love_mode == 2 && O[y][x] == 1) or (love_mode == 3 && V[y][x] == 1) or (love_mode == 0 && E[y][x] == 1)) {
           int pixel = layout[y][x];
           if (pixel != INUL) {
             newColor[pixel][0] = tempCol[0];
@@ -347,7 +385,82 @@ void love(int wait) {
     }
   }
   
-  delay(wait); 
+  FastLED.delay(wait); 
+}
+
+void drip(int wait) {
+  boolean done = true;
+  boolean move_step = false;
+
+  // fade to black
+  if (love_mode == 0) {
+    mode_start_time = millis();
+    for(int x = 0;x < 7;x++) {
+      for(int y = 0;y < 6;y++) {
+        int pixel = layout[y][x];
+        if (pixel != INUL) {
+          newColor[pixel][0] = 0;
+          newColor[pixel][1] = 0;
+          newColor[pixel][2] = 0;
+        }
+      }
+    }
+    love_mode++;
+  } else if (love_mode == 1 ) {
+    for(int pixel = 0;pixel< PIXEL_COUNT;pixel++) {
+      for(int i =  0;i<3;i++) {
+        if (newColor[pixel][i] != prevColor[pixel][i]) {
+          done = false;
+        }
+      }
+      
+      leds[pixel].setHSV(prevColor[pixel][0], prevColor[pixel][1], prevColor[pixel][2]);
+      
+      for(int i =  0;i<3;i++) {
+        if (newColor[pixel][i] > prevColor[pixel][i]) {
+          prevColor[pixel][i]++;
+        } else if (newColor[pixel][i] < prevColor[pixel][i]) {
+          prevColor[pixel][i]--;
+        }
+      }
+    }
+    if (done) {
+      love_mode++;
+    }
+  } else if (love_mode == 2) {
+    if(mode_start_time + 500 < millis()) {
+      mode_start_time = millis();
+      move_step = true;
+    }
+    if (move_step && state[5][3] == CRGB(0, 255, 0)) {
+      state[5][3] = CRGB( 0, 254, 0);
+    }
+    for(int x = 0;x < 7;x++) {
+      for(int y = 5;y >= 0;y--) {
+        if (state[y-1][x] == CRGB(0, 255, 0)) {
+          if(move_step) {
+            state[y][x] = CRGB(0, 255, 0);
+            state[y-1][x] = CRGB( 0, 254, 0);
+          }
+        } else if (state[y][x] != CRGB(0, 255, 0)) {
+          state[y][x] -= CRGB( 0, 8, 0);
+        }
+      }
+      if (move_step && (random8() == 156)) {
+        state[0][x] = CRGB(0, 255, 0); 
+      }
+      for(int y = 0;y < 6;y++) {
+        int pixel = layout[y][x];
+        if (pixel != INUL) {
+          leds[pixel] = state[y][x];
+        }
+      }
+    }
+  }
+  
+  FastLED.show();
+
+  FastLED.delay(wait);
 }
 
 void testWhite() {
@@ -358,6 +471,6 @@ void testWhite() {
   FastLED.show();
   
   
-  delay(200);
+  FastLED.delay(200);
 }
 
