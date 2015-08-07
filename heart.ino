@@ -135,7 +135,7 @@ void setup() {
   
   for(int x = 0;x < 7;x++) {
     for(int y = 0;y < 6;y++) {
-       state[y][x] = -1.0;   
+       state[y][x] = -3.0;   
     }
   }
   
@@ -203,7 +203,7 @@ void loop()  {
   } else if (mode == WIPESIDEWAYS) {
     wipeSideways(20);
   } else if (mode == DRIP) {
-    drip(20);
+    drip(500);
   }else if (mode == TESTPALETTE) {
      testPalette(20); 
   } else if (mode == TESTWHITE) {
@@ -428,32 +428,55 @@ void drip(int wait) {
       love_mode++;
     }
   } else if (love_mode == 2) {
-    if(mode_start_time + 500 < millis()) {
-      mode_start_time = millis();
-      move_step = true;
-    }
-    if (move_step && state[5][3] == CRGB(0, 255, 0)) {
-      state[5][3] = CRGB( 0, 254, 0);
-    }
-    for(int x = 0;x < 7;x++) {
-      for(int y = 5;y >= 0;y--) {
-        if (state[y-1][x] == CRGB(0, 255, 0)) {
-          if(move_step) {
-            state[y][x] = CRGB(0, 255, 0);
-            state[y-1][x] = CRGB( 0, 254, 0);
-          }
-        } else if (state[y][x] != CRGB(0, 255, 0)) {
-          state[y][x] -= CRGB( 0, 8, 0);
+    for(int x = 3;x < 4;x++) {
+      boolean new_drip = false;
+      if(random16() < 1000) {
+        new_drip = true;
+      }
+      for(int y = 0;y < 6;y++) {
+        if (state[y][x] < -2.0 && new_drip) {
+          state[y][x] = -1.0;
+          new_drip = false;
+        } else if (state[y][x] > -2.0) {
+          state[y][x] += 0.0002*wait;
+        }
+        if (state[y][x] > 8.0) {
+          state[y][x] = -3.0;
         }
       }
-      if (move_step && (random8() == 156)) {
-        state[0][x] = CRGB(0, 255, 0); 
-      }
+    }
+    for(int x = 0;x < 7;x++) {
       for(int y = 0;y < 6;y++) {
         int pixel = layout[y][x];
         if (pixel != INUL) {
-          leds[pixel] = state[y][x];
+          leds[pixel] = CRGB::Black;
         }
+      }
+    }
+    for(int x = 0;x < 7;x++) {
+      for(int y = 0;y < 6;y++) {
+        if (state[y][x] > -2.0) {
+          Serial.print("x: ");
+          Serial.print(x);
+          Serial.print(", y: ");
+          Serial.print(y);
+          Serial.print(", state: ");
+          Serial.println(state[y][x]);
+
+          for(int i = floor(state[y][x]) - 1;i <= floor(state[y][x]) + 2;i++) {
+            int pixel = layout[i][x];
+            if (i >= 0 && pixel != INUL) {
+              Serial.print("pixel y: ");
+              Serial.print(i);
+              Serial.print(", ease input: ");
+              Serial.print(255-128*abs(state[y][x]-i));
+              Serial.print(", ease output: ");
+              Serial.println(ease8InOutCubic(255-128*abs(state[y][x]-i)));
+              leds[pixel] = CHSV( 96, 255, ease8InOutCubic(255-128*abs(state[y][x]-i)));
+            }
+          }
+        }
+        
       }
     }
   }
