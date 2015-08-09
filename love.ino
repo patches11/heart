@@ -37,21 +37,16 @@
 void love(int wait) {
   boolean done = true;
   
-  for(int pixel = 0;pixel< PIXEL_COUNT;pixel++) {
-   
-    for(int i =  0;i<3;i++) {
-      if (newColor[pixel][i] != prevColor[pixel][i]) {
-        done = false;
-      }
-    }
-    
+  for(int pixel = 0;pixel < PIXEL_COUNT;pixel++) {       
     leds[pixel].setHSV(prevColor[pixel][0], prevColor[pixel][1], prevColor[pixel][2]);
     
-    for(int i =  0;i<3;i++) {
+    for(int i = 0;i < 3;i++) {
       if (newColor[pixel][i] > prevColor[pixel][i]) {
         prevColor[pixel][i]++;
+        done = false;
       } else if (newColor[pixel][i] < prevColor[pixel][i]) {
         prevColor[pixel][i]--;
+        done = false;
       }
     }
   }
@@ -59,11 +54,11 @@ void love(int wait) {
   FastLED.show();
   
   if (done) {
-    //in letter
     love_mode = (love_mode + 1) % 4;
 
-    random16_add_entropy( random());
+    random16_add_entropy(random());
     
+    //in letter
     tempCol[0] = random8();
     tempCol[1] = random8(225,256);
     tempCol[2] = random8(225,256);
@@ -75,17 +70,13 @@ void love(int wait) {
     
     for(int x = 0;x < 7;x++) {
       for(int y = 0;y < 6;y++) {
-        
-        if((love_mode == 1 && L[y][x] == 1) or (love_mode == 2 && O[y][x] == 1) or (love_mode == 3 && V[y][x] == 1) or (love_mode == 0 && E[y][x] == 1)) {
-          int pixel = layout[y][x];
-          if (pixel != INUL) {
+        int pixel = layout[y][x];
+        if (pixel != INUL) {
+          if((love_mode == 1 && L[y][x] == 1) or (love_mode == 2 && O[y][x] == 1) or (love_mode == 3 && V[y][x] == 1) or (love_mode == 0 && E[y][x] == 1)) {
             newColor[pixel][0] = tempCol[0];
             newColor[pixel][1] = tempCol[1];
             newColor[pixel][2] = tempCol[2];
-          }
-        } else {
-          int pixel = layout[y][x];
-          if (pixel != INUL) {
+          } else {
             newColor[pixel][0] = tempColB[0];
             newColor[pixel][1] = tempColB[1];
             newColor[pixel][2] = tempColB[2];
@@ -94,6 +85,6 @@ void love(int wait) {
       }
     }
   }
-  
+
   FastLED.delay(wait); 
 }

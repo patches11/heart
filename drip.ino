@@ -23,20 +23,16 @@ void drip(int wait) {
     }
     love_mode++;
   } else if (love_mode == 1 ) {
-    for(int pixel = 0;pixel< PIXEL_COUNT;pixel++) {
-      for(int i =  0;i<3;i++) {
-        if (newColor[pixel][i] != prevColor[pixel][i]) {
-          done = false;
-        }
-      }
-      
+    for(int pixel = 0;pixel < PIXEL_COUNT;pixel++) {
       leds[pixel].setHSV(prevColor[pixel][0], prevColor[pixel][1], prevColor[pixel][2]);
       
       for(int i =  0;i<3;i++) {
         if (newColor[pixel][i] > prevColor[pixel][i]) {
           prevColor[pixel][i]++;
+          done = false;
         } else if (newColor[pixel][i] < prevColor[pixel][i]) {
           prevColor[pixel][i]--;
+          done = false;
         }
       }
     }
@@ -59,10 +55,6 @@ void drip(int wait) {
         if (state[y][x] > 8.0) {
           state[y][x] = -3.0;
         }
-      }
-    }
-    for(int x = 0;x < 7;x++) {
-      for(int y = 0;y < 6;y++) {
         int pixel = layout[y][x];
         if (pixel != INUL) {
           leds[pixel] = CRGB::Black;

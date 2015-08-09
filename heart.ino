@@ -1,6 +1,5 @@
 
 #include <FastLED.h>
-#include <HSBColor.h>
 #include <Entropy.h>
 
 #define INUL 99
@@ -50,8 +49,8 @@ const uint8_t layout[6][7] = {
 #define TESTWHITE 100
 
 
-int newColor[27][3];
-int prevColor[27][3];
+byte newColor[27][3];
+byte prevColor[27][3];
 int tempCol[] = {0,0,0};
 int tempColB[] = {0,0,0};
 int location = 0;
@@ -66,6 +65,8 @@ int count;
 CRGB leds[PIXEL_COUNT];
 
 void setup() {
+  delay(1000);
+
   Serial.begin(9600);
   FastLED.addLeds<CHIPSET, LED_PIN, COLOR_ORDER>(leds, PIXEL_COUNT);
   FastLED.setCorrection(Typical8mmPixel);
@@ -84,15 +85,15 @@ void setup() {
   //Start-up seq.
   startup();
   
-  for(int i = 0;i<27;i++) {
-    for(int j = 0;j<3;j++) {
+  for(int i = 0;i < 27;i++) {
+    for(int j = 0;j < 3;j++) {
       newColor[i][j] = 0;
       prevColor[i][j] = 0;
     } 
   }
   
-  mode = RANDOM;
-  cycle_modes = true;
+  mode = FIRE;
+  cycle_modes = false;
   cycle_time = 30000;
   start_time = millis();
   love_mode = 0;
@@ -103,7 +104,6 @@ int mod(int x, int m) {
 }
 
 void loop()  {
-  
   if (mode == RANDOM) {
     randomColors(20);
   } else if (mode == PLASMA) {

@@ -8,7 +8,7 @@ void randomColors(int wait) {
     }
     
     if (done) {
-      random16_add_entropy( random());
+      random16_add_entropy(random());
 
       newColor[pixel][0] = random8();
       newColor[pixel][1] = random8(200,256);
