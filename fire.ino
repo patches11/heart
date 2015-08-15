@@ -1,7 +1,7 @@
 // COOLING: How much does the air cool as it rises?
 // Less cooling = taller flames.  More cooling = shorter flames.
 // Default 55, suggested range 20-100
-#define COOLING  5
+#define COOLING  2
  
 // SPARKING: What chance (out of 255) is there that a new spark will be lit?
 // Higher chance = more roaring fire.  Lower chance = more flickery fire.
@@ -9,15 +9,13 @@
 #define SPARKING 200
 
 //Heating co-efficient for straight verticle heating
-#define SHEATING 16
+#define SHEATING 8
 
 //Heating co-efficient for heating at an angle
-#define AHEATING 17
+#define AHEATING 10
 
 //Number of verticle elements
 #define VERTICLE 6
-
-#define COOLING_RATIO 50
 
 void fire(int wait)
 {
@@ -28,7 +26,7 @@ void fire(int wait)
   // Step 1.  Cool down every cell a little
   for(int x = 0;x < 7;x++) {
     for(int y = 0;y < 6;y++) {
-      heat[y][x] = qsub8( heat[y][x],  random8(0, ((COOLING * 10) / VERTICLE) + 2) * ((heat[y][x] + COOLING_RATIO) / COOLING_RATIO));
+      heat[y][x] = qsub8( heat[y][x],  random8(0, ((COOLING * 10) / VERTICLE) + 2));
     }
   }
  
