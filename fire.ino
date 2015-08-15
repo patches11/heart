@@ -17,6 +17,8 @@
 //Number of verticle elements
 #define VERTICLE 6
 
+#define COOLING_GRAD 30
+
 void fire(int wait)
 {
   random16_add_entropy(random());
@@ -26,7 +28,7 @@ void fire(int wait)
   // Step 1.  Cool down every cell a little
   for(int x = 0;x < 7;x++) {
     for(int y = 0;y < 6;y++) {
-      heat[y][x] = qsub8( heat[y][x],  random8(0, ((COOLING * 10) / VERTICLE) + 2));
+      heat[y][x] = qsub8( heat[y][x],  random8(0, ((COOLING * 10) / VERTICLE) + 2) + heat[y][x]/COOLING_GRAD);
     }
   }
  
@@ -41,7 +43,7 @@ void fire(int wait)
     // Step 3.  Randomly ignite new 'sparks' of heat near the bottom
     for(int x = 0;x < 7;x++) {
       if( random8() < SPARKING ) {
-        heat[5-abs(x-3)][x] = qadd8( heat[5-abs(x-3)][x], random8(3,10) );
+        heat[5-abs(x-3)][x] = qadd8( heat[5-abs(x-3)][x], random8(3,11) );
       }
     }
     
