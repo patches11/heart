@@ -17,7 +17,12 @@
 //Number of verticle elements
 #define VERTICLE 6
 
-#define COOLING_GRAD 30
+#define COOLING_GRAD 15
+
+byte randomWeighted() {
+  static byte nums[] = {3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 15};
+  return nums[random(sizeof(nums)/sizeof(byte))];
+}
 
 void fire(int wait)
 {
@@ -43,7 +48,7 @@ void fire(int wait)
     // Step 3.  Randomly ignite new 'sparks' of heat near the bottom
     for(int x = 0;x < 7;x++) {
       if( random8() < SPARKING ) {
-        heat[5-abs(x-3)][x] = qadd8( heat[5-abs(x-3)][x], random8(3,11) );
+        heat[5-abs(x-3)][x] = qadd8( heat[5-abs(x-3)][x], randomWeighted() );
       }
     }
     
