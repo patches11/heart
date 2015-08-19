@@ -3,6 +3,7 @@
 #include <Entropy.h>
 
 // Audio
+#include <SerialFlash.h>
 #include <Audio.h>
 #include <Wire.h>
 #include <SPI.h>
@@ -43,7 +44,7 @@ const uint8_t layout[6][7] = {
 
 #define LED_PIN     2
 #define COLOR_ORDER RGB
-#define CHIPSET     WS2811
+#define CHIPSET     WS2811_PORTD
 #define PIXEL_COUNT    27
 
 #define BRIGHTNESS  64
