@@ -28,7 +28,7 @@ const uint8_t layout[6][7] = {
 
 #define LED_PIN     2
 #define COLOR_ORDER RGB
-#define CHIPSET     WS2811
+#define CHIPSET     WS2811_PORTD
 #define PIXEL_COUNT    27
 
 #define BRIGHTNESS  64
@@ -92,7 +92,7 @@ void setup() {
     } 
   }
   
-  mode = FIRE;
+  mode = LOVE;
   cycle_modes = false;
   cycle_time = 30000;
   start_time = millis();
