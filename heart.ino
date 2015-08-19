@@ -2,6 +2,21 @@
 #include <FastLED.h>
 #include <Entropy.h>
 
+// Audio
+#include <Audio.h>
+#include <Wire.h>
+#include <SPI.h>
+#include <SD.h>
+
+AudioInputI2S          audioInput;         // audio shield: mic or line-in
+AudioAnalyzeFFT1024    fft1024;
+
+AudioConnection patchCord1(audioInput, 0, fft1024, 0);
+
+AudioControlSGTL5000 audioShield;
+
+const int myInput = AUDIO_INPUT_MIC;
+
 #define INUL 99
 
 const uint32_t palette[256] = {
@@ -43,6 +58,7 @@ const uint8_t layout[6][7] = {
 #define WIPESIDEWAYS 4
 #define DRIP 5
 #define FIRE 6
+#define AUDIO 7
 
 // test modes
 #define TESTPALETTE 99
@@ -78,6 +94,14 @@ void setup() {
   
   random16_add_entropy( Entropy.random());
   
+  // Audio set up
+  AudioMemory(12);
+  audioShield.enable();
+  audioShield.inputSelect(myInput);
+  audioShield.volume(0.5);
+
+  fft1024.windowFunction(AudioWindowHanning1024);
+  
   count = 0;
   
   Serial.println("setup");
@@ -92,7 +116,7 @@ void setup() {
     } 
   }
   
-  mode = FIRE;
+  mode = LOVE;
   cycle_modes = false;
   cycle_time = 30000;
   start_time = millis();
@@ -118,6 +142,8 @@ void loop()  {
     drip(20);
   } else if (mode == FIRE) {
     fire(20);
+  } else if (mode == AUDIO) {
+    audio(20);
   } else if (mode == TESTPALETTE) {
      testPalette(20); 
   } else if (mode == TESTWHITE) {
