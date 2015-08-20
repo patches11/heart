@@ -93,7 +93,7 @@ void setup() {
   }
   
   mode = LOVE;
-  cycle_modes = false;
+  cycle_modes = true;
   cycle_time = 30000;
   start_time = millis();
   love_mode = 0;
