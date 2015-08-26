@@ -1,4 +1,3 @@
-
 void audio(int wait) {
   static float level[7];
   static byte heat[6][7];
