@@ -46,6 +46,10 @@ const uint8_t layout[6][7] = {
    INUL,INUL,INUL,  26,INUL,INUL,INUL
 };
 
+const uint8_t items[7] = {2, 4, 5, 5, 5, 4, 2};
+
+const uint8_t item_start[7] = {2, 3, 4, 5, 4, 3, 2};
+
 #define LED_PIN     2
 #define COLOR_ORDER RGB
 #define CHIPSET     WS2811_PORTD
@@ -123,9 +127,9 @@ void setup() {
   //Start-up seq.
   startup();
   
-  mode = LOVE;
-  cycle_modes = true;
-  cycle_time = 30000;
+  mode = AUDIO;//LOVE;
+  cycle_modes = false;//true
+  cycle_time = 60000;
   start_time = millis();
   love_mode = 0;
 }
@@ -150,7 +154,7 @@ void loop()  {
   } else if (mode == FIRE) {
     fire(20);
   } else if (mode == AUDIO) {
-    audio(20);
+    audio(5);
   } else if (mode == TESTPALETTE) {
     testPalette(20); 
   } else if (mode == TESTWHITE) {
