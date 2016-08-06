@@ -1,15 +1,12 @@
 
 
 void drip(int wait) {
-  boolean done = true;
-  boolean move_step = false;
   static double state[6][7];
 
-  random16_add_entropy( random());
+  random16_add_entropy( Entropy.random());
 
-  // fade to black
+  // fade to black - initialize
   if (love_mode == 0) {
-    mode_start_time = millis();
     for(int x = 0;x < 7;x++) {
       for(int y = 0;y < 6;y++) {
         int pixel = layout[y][x];
@@ -22,24 +19,19 @@ void drip(int wait) {
       }
     }
     love_mode++;
-  } else if (love_mode == 1 ) {
-    for(int pixel = 0;pixel < PIXEL_COUNT;pixel++) {
-      leds[pixel].setHSV(prevColor[pixel][0], prevColor[pixel][1], prevColor[pixel][2]);
-      
-      for(int i =  0;i<3;i++) {
-        if (newColor[pixel][i] > prevColor[pixel][i]) {
-          prevColor[pixel][i]++;
-          done = false;
-        } else if (newColor[pixel][i] < prevColor[pixel][i]) {
-          prevColor[pixel][i]--;
-          done = false;
-        }
-      }
-    }
+  }
+ 
+  // do fade - steps 
+  if (love_mode == 1 ) {
+    boolean done = transitionColors();
+    
     if (done) {
       love_mode++;
     }
-  } else if (love_mode == 2) {
+  } 
+ 
+  //run drips
+  if (love_mode == 2) {
     for(int x = 0;x < 7;x++) {
       boolean new_drip = false;
       if(random16() < 500) {
@@ -64,22 +56,9 @@ void drip(int wait) {
     for(int x = 0;x < 7;x++) {
       for(int y = 0;y < 6;y++) {
         if (state[y][x] > -2.0) {
-          Serial.print("x: ");
-          Serial.print(x);
-          Serial.print(", y: ");
-          Serial.print(y);
-          Serial.print(", state: ");
-          Serial.println(state[y][x]);
-
           for(int i = max(0, floor(state[y][x]) - 1);i <= min(5, floor(state[y][x]) + 2);i++) {
             int pixel = layout[i][x];
             if (i >= 0 && pixel != INUL) {
-              Serial.print("pixel y: ");
-              Serial.print(i);
-              Serial.print(", ease input: ");
-              Serial.print(255-128*abs(state[y][x]-i));
-              Serial.print(", ease output: ");
-              Serial.println(ease8InOutCubic(255-128*abs(state[y][x]-i)));
               leds[pixel] += CHSV( 160, 255, ease8InOutCubic(255-128*abs(state[y][x]-i)));
             }
           }

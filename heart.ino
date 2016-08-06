@@ -1,3 +1,4 @@
+#include "functions.h"
 
 #define FASTLED_ALLOW_INTERRUPTS 0
 
@@ -49,7 +50,7 @@ const uint8_t layout[6][7] = {
 #define CHIPSET     WS2811_PORTD
 #define PIXEL_COUNT    27
 
-#define BRIGHTNESS  64
+#define BRIGHTNESS  128
 
 #define MODES 7
 
@@ -68,17 +69,16 @@ const uint8_t layout[6][7] = {
 #define TESTWHITE 100
 
 
-byte newColor[27][3];
-byte prevColor[27][3];
-int tempCol[] = {0,0,0};
-int tempColB[] = {0,0,0};
+int newColor[27][3];
+int prevColor[27][3];
+uint8_t tempCol[] = {0,0,0};
+uint8_t tempColB[] = {0,0,0};
 int location = 0;
-int mode;
+uint8_t mode;
 boolean cycle_modes;
-long cycle_time;
-int start_time;
-int mode_start_time;
-int love_mode;
+unsigned long cycle_time;
+unsigned long start_time;
+uint8_t love_mode;
 int count;
 
 CRGB leds[PIXEL_COUNT];
@@ -101,26 +101,26 @@ void setup() {
   AudioMemory(12);
   audioShield.enable();
   audioShield.inputSelect(myInput);
-  audioShield.volume(0.5);
+  audioShield.volume(1.0);
 
   fft1024.windowFunction(AudioWindowHanning1024);
   
   count = 0;
   
   Serial.println("setup");
-
-  //Start-up seq.
-  startup();
-  
-  for(int i = 0;i < 27;i++) {
-    for(int j = 0;j < 3;j++) {
+ 
+  for(uint8_t i = 0;i < 27;i++) {
+    for(uint8_t j = 0;j < 3;j++) {
       newColor[i][j] = 0;
       prevColor[i][j] = 0;
     } 
   }
+
+  //Start-up seq.
+  startup();
   
   mode = LOVE;
-  cycle_modes = false;
+  cycle_modes = true;
   cycle_time = 30000;
   start_time = millis();
   love_mode = 0;
@@ -148,7 +148,7 @@ void loop()  {
   } else if (mode == AUDIO) {
     audio(20);
   } else if (mode == TESTPALETTE) {
-     testPalette(20); 
+    testPalette(20); 
   } else if (mode == TESTWHITE) {
     testWhite(); 
   }

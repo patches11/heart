@@ -35,21 +35,7 @@
   };
 
 void love(int wait) {
-  boolean done = true;
-  
-  for(int pixel = 0;pixel < PIXEL_COUNT;pixel++) {       
-    leds[pixel].setHSV(prevColor[pixel][0], prevColor[pixel][1], prevColor[pixel][2]);
-    
-    for(int i = 0;i < 3;i++) {
-      if (newColor[pixel][i] > prevColor[pixel][i]) {
-        prevColor[pixel][i]++;
-        done = false;
-      } else if (newColor[pixel][i] < prevColor[pixel][i]) {
-        prevColor[pixel][i]--;
-        done = false;
-      }
-    }
-  }
+  boolean done = transitionColors();
   
   FastLED.show();
   
@@ -60,17 +46,17 @@ void love(int wait) {
     
     //in letter
     tempCol[0] = random8();
-    tempCol[1] = random8(225,256);
-    tempCol[2] = random8(225,256);
+    tempCol[1] = random8(225,255);
+    tempCol[2] = random8(225,255);
     
     //out of letter
     tempColB[0] = random8();
-    tempColB[1] = random8(175,200);
-    tempColB[2] = random8(175,200);
+    tempColB[1] = random8(125,175);
+    tempColB[2] = random8(125,175);
     
-    for(int x = 0;x < 7;x++) {
-      for(int y = 0;y < 6;y++) {
-        int pixel = layout[y][x];
+    for(uint8_t x = 0;x < 7;x++) {
+      for(uint8_t y = 0;y < 6;y++) {
+        uint8_t pixel = layout[y][x];
         if (pixel != INUL) {
           if((love_mode == 1 && L[y][x] == 1) or (love_mode == 2 && O[y][x] == 1) or (love_mode == 3 && V[y][x] == 1) or (love_mode == 0 && E[y][x] == 1)) {
             newColor[pixel][0] = tempCol[0];
