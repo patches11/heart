@@ -1,37 +1,27 @@
-
-
 void drip(int wait) {
+  boolean done = true;
+  boolean move_step = false;
   static double state[6][7];
-
-  random16_add_entropy( Entropy.random());
-
-  // fade to black - initialize
-  if (love_mode == 0) {
+ 
+  random16_add_entropy( random());
+ 
+  // fade to black
+  if (love_mode == 0 ) {
     for(int x = 0;x < 7;x++) {
       for(int y = 0;y < 6;y++) {
-        int pixel = layout[y][x];
         state[y][x] = -3.0;   
-        if (pixel != INUL) {
-          newColor[pixel][0] = 0;
-          newColor[pixel][1] = 0;
-          newColor[pixel][2] = 0;
-        }
       }
     }
-    love_mode++;
-  }
- 
-  // do fade - steps 
-  if (love_mode == 1 ) {
-    boolean done = transitionColors();
-    
-    if (done) {
-      love_mode++;
+    for(int pixel = 0;pixel < PIXEL_COUNT;pixel++) {
+      leds[pixel].fadeToBlackBy( 8 );
+      if (leds[pixel]) {
+        done = false;
+      }
     }
-  } 
- 
-  //run drips
-  if (love_mode == 2) {
+    if (done) {
+      love_mode = 2;
+    }
+  } else if (love_mode == 2) {
     for(int x = 0;x < 7;x++) {
       boolean new_drip = false;
       if(random16() < 500) {
@@ -56,6 +46,7 @@ void drip(int wait) {
     for(int x = 0;x < 7;x++) {
       for(int y = 0;y < 6;y++) {
         if (state[y][x] > -2.0) {
+ 
           for(int i = max(0, floor(state[y][x]) - 1);i <= min(5, floor(state[y][x]) + 2);i++) {
             int pixel = layout[i][x];
             if (i >= 0 && pixel != INUL) {
@@ -63,12 +54,12 @@ void drip(int wait) {
             }
           }
         }
-        
+         
       }
     }
   }
-  
+   
   FastLED.show();
-
+ 
   FastLED.delay(wait);
 }

@@ -1,8 +1,8 @@
 
 void plasma(int wait) { 
-  uint32_t color;
+  uint16_t color;
   
-  int paletteShift = (millis() % 100000) / 30;
+  int paletteShift = (millis() % 100000) / 50;
  
   for(uint16_t x = 0;x < 240;x+=32) {
     for(uint16_t y = 0;y < 240;y+=32) {
