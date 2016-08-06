@@ -5,6 +5,5 @@ void testWhite() {
   
   FastLED.show();
   
-  
   FastLED.delay(200);
 }
