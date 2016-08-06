@@ -19,7 +19,7 @@ void audio(int wait) {
         int pixel = layout[y][x];
         if (pixel != INUL) {
           heat[y][x]  = qadd8(heat[y][x], level[x] * mult * 20);
-          leds[pixel] =  CHSV(x*33, 255, heat[y][x]);
+          leds[pixel] =  CHSV((6 - x)*33, 255, heat[y][x]);
           heat[y][x]  = qsub8(heat[y][x], 120);
         }
       }
